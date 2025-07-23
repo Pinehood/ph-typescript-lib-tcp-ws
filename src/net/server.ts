@@ -41,6 +41,7 @@ export class NetServer implements Server {
         const id = uuidv4();
         const conn: Connection = {
           id,
+          format: this.tcpInstance?.format ?? "json",
           send: (packet) => this.handleSendTcp(socket, packet),
         };
         this.tcpInstance?.pool.add(conn);
@@ -65,6 +66,7 @@ export class NetServer implements Server {
         const id = uuidv4();
         const conn: Connection = {
           id,
+          format: this.wsInstance?.format ?? "json",
           send: (packet: Packet) => this.handleSendWs(socket, packet),
         };
         this.wsInstance?.pool.add(conn);

@@ -41,6 +41,7 @@ export class NetClient implements Client {
           this.retryCount = 0;
           this.tcpConnection = {
             id: `${this.options.host}:${this.options.port}`,
+            format: this.options.format ?? "json",
             send: (packet: Packet) => {
               this.send(packet);
             },
@@ -57,6 +58,7 @@ export class NetClient implements Client {
           this.retryCount = 0;
           this.wsConnection = {
             id: `${this.options.host}:${this.options.port}`,
+            format: this.options.format ?? "json",
             send: (packet: Packet) => {
               this.send(packet);
             },

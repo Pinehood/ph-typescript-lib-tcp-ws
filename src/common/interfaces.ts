@@ -4,6 +4,7 @@ import {
   PacketHandlerRegistry,
   Queue,
 } from "../services";
+import { BasicType } from "./types";
 
 export interface Packet {
   opcode: number;
@@ -13,6 +14,7 @@ export interface Packet {
 export interface Connection {
   id: string;
   send(packet: Packet): Promise<void> | void;
+  format: "json" | "bytes";
   metadata?: any;
 }
 
@@ -34,6 +36,7 @@ export interface BaseInstanceOptions {
   port: number;
   registry: PacketHandlerRegistry;
   encryption: Encryption;
+  format: "json" | "bytes";
   secure?: boolean;
   handlers?: Partial<{
     onConnect: (connection: Connection) => void;
@@ -46,4 +49,12 @@ export interface ServerInstance<T> extends BaseInstanceOptions {
   pool: ConnectionPool;
   queue: Queue;
   server?: T | null;
+}
+
+export interface FieldMetadata {
+  key: string;
+  type: BasicType;
+  structType?: any;
+  enumMap?: any;
+  arrayLength?: number;
 }
