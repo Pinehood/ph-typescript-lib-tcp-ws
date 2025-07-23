@@ -10,8 +10,9 @@ export function Field(
   options?: { length?: number }
 ): PropertyDecorator {
   return (target, propertyKey) => {
-    const metadata = classMetadata.get(target.constructor) || [];
-    metadata.push({
+    const ctor = target.constructor;
+    const meta: FieldMetadata[] = classMetadata.get(ctor) || [];
+    meta.push({
       key: propertyKey as string,
       type,
       structType:
@@ -19,7 +20,12 @@ export function Field(
       enumMap: type === "enum" ? structTypeOrEnum : undefined,
       arrayLength: type === "array" ? options?.length : undefined,
     });
-    classMetadata.set(target.constructor, metadata);
+    classMetadata.set(ctor, meta);
+    Object.defineProperty(ctor, "__packetFields", {
+      value: meta,
+      enumerable: false,
+      configurable: true,
+    });
   };
 }
 
@@ -37,6 +43,12 @@ export function getRegisteredHandlers(): HandlerMeta[] {
   return handlerRegistry;
 }
 
-export function getClassMetadata(target: any): FieldMetadata[] {
-  return classMetadata.get(target.constructor || target) || [];
+export function getClassMetadata(
+  target: any,
+  isCtor: boolean
+): FieldMetadata[] {
+  const ctor = isCtor ? Object.getPrototypeOf(target).constructor : target;
+  const fromMap = classMetadata.get(ctor);
+  if (fromMap) return fromMap;
+  return (ctor as any).__packetFields || [];
 }

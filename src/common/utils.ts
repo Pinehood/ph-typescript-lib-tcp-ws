@@ -1,30 +1,31 @@
 import { PacketReader, PacketWriter } from "../services";
 import { getClassMetadata } from "./decorators";
-import { Connection, Packet } from "./interfaces";
 
 export function transformPacketPayloadForRead<T>(
-  conn: Connection,
-  packet: Packet
+  format: "json" | "bytes",
+  payload: Buffer
 ) {
-  if (conn.format === "bytes") {
-    return new PacketReader(packet.payload);
+  if (format === "bytes") {
+    return new PacketReader(payload);
   }
-  return JSON.parse(packet.payload.toString()) as T;
+  return JSON.parse(payload.toString()) as T;
 }
 
 export function transformPacketPayloadForWrite<T>(
-  conn: Connection,
-  packet: T | PacketWriter
+  format: "json" | "bytes",
+  payload: PacketWriter | Buffer | any
 ) {
-  if (conn.format === "bytes") {
-    return (packet as PacketWriter).write();
+  if (format === "bytes") {
+    if (payload instanceof PacketWriter) {
+      return Buffer.from(payload.write());
+    }
+    return Buffer.from(new PacketWriter(payload).write());
   }
-  return Buffer.from(JSON.stringify(packet));
+  return Buffer.from(JSON.stringify(payload));
 }
-
 export function calculateSize(obj: any): number {
   let size = 0;
-  const fields = getClassMetadata(obj);
+  const fields = getClassMetadata(obj, true);
   for (const field of fields) {
     const value = obj[field.key];
     switch (field.type) {
