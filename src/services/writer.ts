@@ -6,20 +6,21 @@ export class PacketWriter {
   private view: DataView;
   private offset = 0;
 
-  constructor(private readonly obj?: any) {
+  constructor(private obj?: any) {
     const size = obj ? calculateSize(obj) : 2048;
     this.buffer = new ArrayBuffer(size);
     this.view = new DataView(this.buffer);
   }
 
-  write(obj?: any): ArrayBuffer {
+  write(obj: any = this.obj): ArrayBuffer {
+    if (!obj) throw new Error("No object provided to write");
     this.offset = 0;
-    this.writeStruct(obj ?? this.obj);
+    this.writeStruct(obj);
     return this.buffer.slice(0, this.offset);
   }
 
   private writeStruct(obj: any) {
-    const fields = getClassMetadata(obj);
+    const fields = getClassMetadata(obj, true);
     for (const field of fields) {
       const value = obj[field.key];
       switch (field.type) {

@@ -4,8 +4,18 @@ export class PacketReader {
   private view: DataView;
   private offset = 0;
 
-  constructor(private buffer: ArrayBuffer) {
-    this.view = new DataView(buffer);
+  constructor(private buffer: Buffer | ArrayBuffer) {
+    if (buffer instanceof ArrayBuffer) {
+      this.buffer = buffer;
+    } else if (Buffer.isBuffer(buffer)) {
+      this.buffer = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength
+      );
+    } else {
+      throw new TypeError("PacketReader expects Buffer or ArrayBuffer");
+    }
+    this.view = new DataView(this.buffer);
   }
 
   read<T>(cls: new () => T): T {
@@ -15,7 +25,7 @@ export class PacketReader {
 
   private readStruct<T>(cls: new () => T): T {
     const obj = new cls();
-    const fields = getClassMetadata(cls);
+    const fields = getClassMetadata(cls, false);
     for (const field of fields) {
       const key = field.key as keyof T;
       switch (field.type) {
