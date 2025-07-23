@@ -16,7 +16,10 @@ export class NetServer implements Server {
   private wsInstance?: ServerInstance<WebSocket.Server>;
   public readonly manager: Manager;
 
-  constructor(private readonly type: NetType, options: BaseInstanceOptions) {
+  constructor(
+    private readonly type: NetType,
+    private readonly options: BaseInstanceOptions
+  ) {
     const pool = new ConnectionPool();
     const queue = new Queue();
     this.manager = new Manager();
@@ -41,7 +44,7 @@ export class NetServer implements Server {
         const id = uuidv4();
         const conn: Connection = {
           id,
-          format: this.tcpInstance?.format ?? "json",
+          format: this.options.format,
           send: (packet) => this.handleSendTcp(socket, packet),
         };
         this.tcpInstance?.pool.add(conn);
@@ -66,7 +69,7 @@ export class NetServer implements Server {
         const id = uuidv4();
         const conn: Connection = {
           id,
-          format: this.wsInstance?.format ?? "json",
+          format: this.options.format,
           send: (packet: Packet) => this.handleSendWs(socket, packet),
         };
         this.wsInstance?.pool.add(conn);

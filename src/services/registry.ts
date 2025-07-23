@@ -1,7 +1,7 @@
 import { getRegisteredHandlers } from "../common/decorators";
 import * as fs from "fs";
 import * as path from "path";
-import { Connection } from "../common/interfaces";
+import { Connection, Packet } from "../common/interfaces";
 import { Handler, HandlerEntry } from "../common/types";
 
 export class PacketHandlerRegistry {
@@ -32,10 +32,10 @@ export class PacketHandlerRegistry {
     }
   }
 
-  handle(conn: Connection, packet: { opcode: number; payload: any }) {
+  handle(conn: Connection, packet: Packet) {
     const entry = this.handlers.get(packet.opcode);
     if (!entry) throw new Error(`No handler for opcode ${packet.opcode}`);
-    return entry.handlerFn(conn, packet.payload);
+    return entry.handlerFn(conn, packet);
   }
 
   getPayloadClass(opcode: number) {
