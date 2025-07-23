@@ -8,9 +8,9 @@ const encryption = new Encryption(
 
 const registry = new PacketHandlerRegistry();
 
-registry.register(0x02, (conn, packet) => {
+registry.register(0x02, (conn, payload) => {
   console.log(`Received packet with opcode 0x02 from server`);
-  const json = packet.payload.toString();
+  const json = payload.toString();
   console.log(`Payload: ${json}`);
   conn.send({
     opcode: 0x01,
@@ -24,6 +24,7 @@ async function tcpClient() {
     port: 9000,
     encryption,
     registry,
+    format: "json",
   });
   await client.connect();
   client.configure();
@@ -39,6 +40,7 @@ async function wsClient() {
     port: 9001,
     encryption,
     registry,
+    format: "json",
   });
   await client.connect();
   client.configure();

@@ -7,9 +7,9 @@ const encryption = new Encryption(
   Buffer.from("1234567890123456", "utf-8")
 );
 
-registry.register(0x01, (conn, packet) => {
+registry.register(0x01, (conn, payload) => {
   console.log(`Received packet with opcode 0x01 from connection ${conn.id}`);
-  const json = packet.payload.toString();
+  const json = payload.toString();
   console.log(`Payload: ${json}`);
   conn.send({
     opcode: 0x02,
@@ -21,6 +21,7 @@ const tcpServer = new NetServer("tcp", {
   port: 9000,
   registry,
   encryption,
+  format: "json",
   handlers: {
     onConnect(connection) {
       console.log("TCP Connected", connection.id);
@@ -38,6 +39,7 @@ const wsServer = new NetServer("ws", {
   port: 9001,
   registry,
   encryption,
+  format: "json",
   handlers: {
     onConnect(connection) {
       console.log("WS Connected", connection.id);
