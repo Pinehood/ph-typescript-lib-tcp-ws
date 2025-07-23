@@ -1,5 +1,5 @@
 import { NetClient } from "../net";
-import { Encryption, PacketHandlerRegistry } from "../services";
+import { Encryption, PacketHandlerRegistry, PacketWriter } from "../services";
 
 const encryption = new Encryption(
   Buffer.from("12345678901234567890123456789012", "utf-8"),
@@ -8,46 +8,56 @@ const encryption = new Encryption(
 
 const registry = new PacketHandlerRegistry();
 
-registry.register(0x02, (conn, payload) => {
-  console.log(`Received packet with opcode 0x02 from server`);
-  const json = payload.toString();
-  console.log(`Payload: ${json}`);
-  conn.send({
-    opcode: 0x01,
-    payload: Buffer.from(JSON.stringify({ message: "Hello, again!" })),
-  });
-});
+// registry.register(0x02, (conn, packet) => {
+//   console.log(`Received packet with opcode 0x02 from server`);
+//   const json = packet.payload.toString();
+//   console.log(`Payload: ${json}`);
+//   conn.send({
+//     opcode: 0x01,
+//     payload: Buffer.from(JSON.stringify({ message: "Hello, again!" })),
+//   });
+// });
 
 async function tcpClient() {
+  await registry.loadHandlersFrom(["./src/_tmp/handlers"]);
   const client = new NetClient("tcp", {
     host: "localhost",
     port: 9000,
     encryption,
     registry,
-    format: "json",
+    format: "bytes",
   });
   await client.connect();
   client.configure();
   client.send({
     opcode: 0x01,
-    payload: Buffer.from(JSON.stringify({ message: "Hello, server!" })),
+    payload: Buffer.from([]),
   });
+  // client.send({
+  //   opcode: 0x01,
+  //   payload: Buffer.from(JSON.stringify({ message: "Hello, server!" })),
+  // });
 }
 
 async function wsClient() {
+  await registry.loadHandlersFrom(["./src/_tmp/handlers"]);
   const client = new NetClient("ws", {
     host: "localhost",
     port: 9001,
     encryption,
     registry,
-    format: "json",
+    format: "bytes",
   });
   await client.connect();
   client.configure();
   client.send({
     opcode: 0x01,
-    payload: Buffer.from(JSON.stringify({ message: "Hello, server!" })),
+    payload: Buffer.from([]),
   });
+  // client.send({
+  //   opcode: 0x01,
+  //   payload: Buffer.from(JSON.stringify({ message: "Hello, server!" })),
+  // });
 }
 
 async function main() {

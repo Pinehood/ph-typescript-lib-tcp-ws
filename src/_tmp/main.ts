@@ -1,5 +1,7 @@
+import { getClassMetadata } from "../common";
 import { NetServer } from "../net";
 import { PacketHandlerRegistry, Encryption, Loop } from "../services";
+import { Position } from "./handlers/basic";
 
 const registry = new PacketHandlerRegistry();
 const encryption = new Encryption(
@@ -7,48 +9,60 @@ const encryption = new Encryption(
   Buffer.from("1234567890123456", "utf-8")
 );
 
-registry.register(0x01, (conn, payload) => {
-  console.log(`Received packet with opcode 0x01 from connection ${conn.id}`);
-  const json = payload.toString();
-  console.log(`Payload: ${json}`);
-  conn.send({
-    opcode: 0x02,
-    payload: Buffer.from(JSON.stringify({ message: "Hello, client!" })),
+// registry.register(0x01, (conn, packet) => {
+//   console.log(`Received packet with opcode 0x01 from connection ${conn.id}`);
+//   const json = packet.payload.toString();
+//   console.log(`Payload: ${json}`);
+//   conn.send({
+//     opcode: 0x02,
+//     payload: Buffer.from(JSON.stringify({ message: "Hello, client!" })),
+//   });
+// });
+
+const tcpServer = () => {
+  const server = new NetServer("tcp", {
+    port: 9000,
+    registry,
+    encryption,
+    format: "bytes",
+    handlers: {
+      onConnect(connection) {
+        console.log("TCP Connected", connection.id);
+      },
+      onError(connection, error) {
+        console.error("TCP Error", connection.id, error);
+      },
+    },
   });
-});
+  server.manager.addUpdateLoop(new Loop(() => console.log("Hi TCP!")));
+  server.start();
+  server.manager.startUpdateLoops();
+};
 
-const tcpServer = new NetServer("tcp", {
-  port: 9000,
-  registry,
-  encryption,
-  format: "json",
-  handlers: {
-    onConnect(connection) {
-      console.log("TCP Connected", connection.id);
+const wsServer = () => {
+  const server = new NetServer("ws", {
+    port: 9001,
+    registry,
+    encryption,
+    format: "bytes",
+    handlers: {
+      onConnect(connection) {
+        console.log("WS Connected", connection.id);
+      },
+      onError(connection, error) {
+        console.error("WS Error", connection.id, error);
+      },
     },
-    onError(connection, error) {
-      console.error("TCP Error", connection.id, error);
-    },
-  },
-});
-tcpServer.manager.addUpdateLoop(new Loop(() => console.log("Hi TCP!")));
-tcpServer.start();
-tcpServer.manager.startUpdateLoops();
+  });
+  server.manager.addUpdateLoop(new Loop(() => console.log("Hi TCP!")));
+  server.start();
+  server.manager.startUpdateLoops();
+};
 
-const wsServer = new NetServer("ws", {
-  port: 9001,
-  registry,
-  encryption,
-  format: "json",
-  handlers: {
-    onConnect(connection) {
-      console.log("WS Connected", connection.id);
-    },
-    onError(connection, error) {
-      console.error("WS Error", connection.id, error);
-    },
-  },
-});
-wsServer.manager.addUpdateLoop(new Loop(() => console.log("Hi TCP!")));
-wsServer.start();
-wsServer.manager.startUpdateLoops();
+async function main() {
+  await registry.loadHandlersFrom(["./src/_tmp/handlers"]);
+  tcpServer();
+  wsServer();
+}
+
+main();
