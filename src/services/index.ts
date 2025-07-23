@@ -3,5 +3,7 @@ export * from "./loop";
 export * from "./manager";
 export * from "./packet";
 export * from "./pool";
+export * from "./reader";
 export * from "./registry";
 export * from "./queue";
+export * from "./writer";
