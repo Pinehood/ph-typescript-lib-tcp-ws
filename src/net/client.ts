@@ -7,7 +7,7 @@ import {
   NetType,
   Packet,
 } from "../common";
-import { Manager, PacketUtils } from "../services";
+import { Manager, PacketEncoder } from "../services";
 
 export type WsNet = {
   socket: WebSocket;
@@ -124,7 +124,7 @@ export class NetClient implements Client {
   }
 
   send(packet: Packet) {
-    const raw = PacketUtils.encode(packet);
+    const raw = PacketEncoder.encode(packet);
     const encrypted = this.options.encryption.encrypt(raw);
     if (this.type === "tcp" && this.tcp.socket) {
       this.tcp.socket.write(encrypted);
@@ -135,7 +135,7 @@ export class NetClient implements Client {
 
   private handleData(data: Buffer | WebSocket.Data) {
     const decrypted = this.options.encryption.decrypt(data as Buffer);
-    const packet = PacketUtils.decode(decrypted);
+    const packet = PacketEncoder.decode(decrypted);
     if (packet) {
       if (this.type === "tcp" && this.tcp.connection) {
         this.options.registry.handle(this.tcp.connection, packet);

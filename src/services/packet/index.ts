@@ -1,4 +1,4 @@
 export * from "./reader";
 export * from "./registry";
-export * from "./utils";
+export * from "./encoder";
 export * from "./writer";

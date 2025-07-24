@@ -1,8 +1,8 @@
 import { NetServer } from "../net";
-import { PacketHandlerRegistry, Encryption, Loop } from "../services";
+import { PacketRegistry, Encryption, Loop } from "../services";
 import BasicHandlers from "./handlers/basic";
 
-const registry = new PacketHandlerRegistry();
+const registry = new PacketRegistry();
 const encryption = new Encryption(
   Buffer.from("12345678901234567890123456789012", "utf-8"),
   Buffer.from("1234567890123456", "utf-8")

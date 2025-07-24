@@ -9,7 +9,7 @@ import {
   Server,
   ServerInstance,
 } from "../common";
-import { ConnectionPool, Manager, PacketUtils, Queue } from "../services";
+import { ConnectionPool, Manager, PacketEncoder, Queue } from "../services";
 
 export class NetServer implements Server {
   private tcp?: ServerInstance<net.Server>;
@@ -98,13 +98,13 @@ export class NetServer implements Server {
   }
 
   private handleSendTcp = (socket: net.Socket, packet: Packet) => {
-    const encoded = PacketUtils.encode(packet);
+    const encoded = PacketEncoder.encode(packet);
     const encrypted = this.tcp!.encryption.encrypt(encoded);
     this.tcp!.queue.add(() => socket.write(encrypted));
   };
 
   private handleSendWs(socket: WebSocket, packet: Packet) {
-    const encoded = PacketUtils.encode(packet);
+    const encoded = PacketEncoder.encode(packet);
     const encrypted = this.ws!.encryption.encrypt(encoded);
     this.ws!.queue.add(() => socket.send(encrypted));
   }
@@ -116,7 +116,7 @@ export class NetServer implements Server {
   ) => {
     buffer = Buffer.concat([buffer, data]);
     const decrypted = this.tcp!.encryption.decrypt(buffer);
-    const packet = PacketUtils.decode(decrypted);
+    const packet = PacketEncoder.decode(decrypted);
     if (packet && this.tcp) {
       this.tcp.queue.add(() => this.tcp!.registry.handle(conn, packet));
       buffer = Buffer.alloc(0);
@@ -125,7 +125,7 @@ export class NetServer implements Server {
 
   private handleReceiveWs(data: WebSocket.Data, conn: Connection) {
     const decrypted = this.ws!.encryption.decrypt(Buffer.from(data as Buffer));
-    const packet = PacketUtils.decode(decrypted);
+    const packet = PacketEncoder.decode(decrypted);
     if (packet && this.ws) {
       this.ws.queue.add(() => this.ws!.registry.handle(conn, packet));
     }

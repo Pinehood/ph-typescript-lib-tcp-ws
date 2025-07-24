@@ -1,6 +1,6 @@
 import { Packet } from "../../common";
 
-export class PacketUtils {
+export class PacketEncoder {
   static encode(packet: Packet) {
     const header = Buffer.alloc(6);
     header.writeUInt16BE(packet.opcode, 0);

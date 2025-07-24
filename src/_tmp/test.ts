@@ -1,5 +1,5 @@
 import { NetClient } from "../net";
-import { Encryption, PacketHandlerRegistry } from "../services";
+import { Encryption, PacketRegistry } from "../services";
 import BasicHandlers from "./handlers/basic";
 
 const encryption = new Encryption(
@@ -7,7 +7,7 @@ const encryption = new Encryption(
   Buffer.from("1234567890123456", "utf-8")
 );
 
-const registry = new PacketHandlerRegistry();
+const registry = new PacketRegistry();
 
 async function tcpClient() {
   await registry.loadHandlersFrom([BasicHandlers]);

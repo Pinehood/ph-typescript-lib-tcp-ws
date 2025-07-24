@@ -8,7 +8,7 @@ import {
   getRegisteredHandlers,
 } from "../../common";
 
-export class PacketHandlerRegistry {
+export class PacketRegistry {
   private handlers = new Map<number, HandlerEntry>();
 
   register(opcode: number, handler: Handler, payloadClass?: new () => any) {

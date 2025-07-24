@@ -1,9 +1,4 @@
-import {
-  ConnectionPool,
-  Encryption,
-  PacketHandlerRegistry,
-  Queue,
-} from "../services";
+import { ConnectionPool, Encryption, PacketRegistry, Queue } from "../services";
 import { BasicType } from "./types";
 
 export interface Packet {
@@ -34,7 +29,7 @@ export interface Server {
 export interface BaseInstanceOptions {
   host?: string;
   port: number;
-  registry: PacketHandlerRegistry;
+  registry: PacketRegistry;
   encryption: Encryption;
   format: "json" | "bytes";
   secure?: boolean;
