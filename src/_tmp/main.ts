@@ -1,5 +1,6 @@
 import { NetServer } from "../net";
 import { PacketHandlerRegistry, Encryption, Loop } from "../services";
+import BasicHandlers from "./handlers/basic";
 
 const registry = new PacketHandlerRegistry();
 const encryption = new Encryption(
@@ -48,7 +49,7 @@ const wsServer = () => {
 };
 
 async function main() {
-  await registry.loadHandlersFrom(["./src/_tmp/handlers"]);
+  await registry.loadHandlersFrom([BasicHandlers]);
   tcpServer();
   wsServer();
 }
