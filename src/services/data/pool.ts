@@ -1,4 +1,4 @@
-import { Connection, Packet } from "../common";
+import { Connection, Packet } from "../../common";
 
 export class ConnectionPool {
   private readonly connections = new Map<string, Connection>();

@@ -1,5 +1,4 @@
-import { calculateSize } from "../common/utils";
-import { getClassMetadata } from "../common/decorators";
+import { calculateSize, getClassMetadata } from "../../common";
 
 export class PacketWriter {
   private buffer: ArrayBuffer;

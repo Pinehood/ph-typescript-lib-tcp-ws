@@ -34,9 +34,9 @@ const tcpServer = () => {
       },
     },
   });
-  server.manager.addUpdateLoop(new Loop(() => console.log("Hi TCP!")));
+  server.mngr.addUpdateLoop(new Loop(() => console.log("Hi TCP!")));
   server.start();
-  server.manager.startUpdateLoops();
+  server.mngr.startUpdateLoops();
 };
 
 const wsServer = () => {
@@ -54,9 +54,9 @@ const wsServer = () => {
       },
     },
   });
-  server.manager.addUpdateLoop(new Loop(() => console.log("Hi TCP!")));
+  server.mngr.addUpdateLoop(new Loop(() => console.log("Hi TCP!")));
   server.start();
-  server.manager.startUpdateLoops();
+  server.mngr.startUpdateLoops();
 };
 
 async function main() {

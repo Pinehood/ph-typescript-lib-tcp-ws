@@ -12,9 +12,9 @@ import {
 import { ConnectionPool, Manager, PacketUtils, Queue } from "../services";
 
 export class NetServer implements Server {
-  private tcpInstance?: ServerInstance<net.Server>;
-  private wsInstance?: ServerInstance<WebSocket.Server>;
-  public readonly manager: Manager;
+  private tcp?: ServerInstance<net.Server>;
+  private ws?: ServerInstance<WebSocket.Server>;
+  public readonly mngr: Manager;
 
   constructor(
     private readonly type: NetType,
@@ -22,15 +22,15 @@ export class NetServer implements Server {
   ) {
     const pool = new ConnectionPool();
     const queue = new Queue();
-    this.manager = new Manager();
+    this.mngr = new Manager();
     if (this.type === "tcp") {
-      this.tcpInstance = {
+      this.tcp = {
         ...options,
         pool,
         queue,
       };
     } else if (this.type === "ws") {
-      this.wsInstance = {
+      this.ws = {
         ...options,
         pool,
         queue,
@@ -39,74 +39,74 @@ export class NetServer implements Server {
   }
 
   start() {
-    if (this.type === "tcp" && this.tcpInstance) {
-      this.tcpInstance.server = net.createServer((socket) => {
+    if (this.type === "tcp" && this.tcp) {
+      this.tcp.server = net.createServer((socket) => {
         const id = uuidv4();
         const conn: Connection = {
           id,
           format: this.options.format,
           send: (packet) => this.handleSendTcp(socket, packet),
         };
-        this.tcpInstance?.pool.add(conn);
-        this.tcpInstance?.handlers?.onConnect?.(conn);
+        this.tcp?.pool.add(conn);
+        this.tcp?.handlers?.onConnect?.(conn);
         let buffer = Buffer.alloc(0);
         socket.on("data", (dat) => this.handleReceiveTcp(buffer, dat, conn));
         socket.on("close", () => {
-          this.tcpInstance?.pool.remove(id);
-          this.tcpInstance?.handlers?.onClose?.(conn);
+          this.tcp?.pool.remove(id);
+          this.tcp?.handlers?.onClose?.(conn);
         });
         socket.on("error", (err) => {
-          this.tcpInstance?.pool.remove(id);
-          this.tcpInstance?.handlers?.onError?.(conn, err);
+          this.tcp?.pool.remove(id);
+          this.tcp?.handlers?.onError?.(conn, err);
         });
       });
-      this.tcpInstance.server.listen(this.tcpInstance.port);
-    } else if (this.type === "ws" && this.wsInstance) {
-      this.wsInstance.server = new WebSocket.Server({
-        port: this.wsInstance.port,
+      this.tcp.server.listen(this.tcp.port);
+    } else if (this.type === "ws" && this.ws) {
+      this.ws.server = new WebSocket.Server({
+        port: this.ws.port,
       });
-      this.wsInstance.server.on("connection", (socket) => {
+      this.ws.server.on("connection", (socket) => {
         const id = uuidv4();
         const conn: Connection = {
           id,
           format: this.options.format,
           send: (packet: Packet) => this.handleSendWs(socket, packet),
         };
-        this.wsInstance?.pool.add(conn);
-        this.wsInstance?.handlers?.onClose?.(conn);
+        this.ws?.pool.add(conn);
+        this.ws?.handlers?.onClose?.(conn);
         socket.on("message", (dat) => this.handleReceiveWs(dat, conn));
         socket.on("close", () => {
-          this.wsInstance?.pool.remove(id);
-          this.wsInstance?.handlers?.onClose?.(conn);
+          this.ws?.pool.remove(id);
+          this.ws?.handlers?.onClose?.(conn);
         });
         socket.on("error", (err) => {
-          this.wsInstance?.pool.remove(id);
-          this.wsInstance?.handlers?.onError?.(conn, err);
+          this.ws?.pool.remove(id);
+          this.ws?.handlers?.onError?.(conn, err);
         });
       });
     }
   }
 
   stop() {
-    if (this.type === "tcp" && this.tcpInstance) {
-      this.tcpInstance.server?.close();
-      this.tcpInstance.server = null;
-    } else if (this.type === "ws" && this.wsInstance) {
-      this.wsInstance.server?.close();
-      this.wsInstance.server = null;
+    if (this.type === "tcp" && this.tcp) {
+      this.tcp.server?.close();
+      this.tcp.server = null;
+    } else if (this.type === "ws" && this.ws) {
+      this.ws.server?.close();
+      this.ws.server = null;
     }
   }
 
   private handleSendTcp = (socket: net.Socket, packet: Packet) => {
     const encoded = PacketUtils.encode(packet);
-    const encrypted = this.tcpInstance!.encryption.encrypt(encoded);
-    this.tcpInstance!.queue.add(() => socket.write(encrypted));
+    const encrypted = this.tcp!.encryption.encrypt(encoded);
+    this.tcp!.queue.add(() => socket.write(encrypted));
   };
 
   private handleSendWs(socket: WebSocket, packet: Packet) {
     const encoded = PacketUtils.encode(packet);
-    const encrypted = this.wsInstance!.encryption.encrypt(encoded);
-    this.wsInstance!.queue.add(() => socket.send(encrypted));
+    const encrypted = this.ws!.encryption.encrypt(encoded);
+    this.ws!.queue.add(() => socket.send(encrypted));
   }
 
   private handleReceiveTcp = (
@@ -115,25 +115,19 @@ export class NetServer implements Server {
     conn: Connection
   ) => {
     buffer = Buffer.concat([buffer, data]);
-    const decrypted = this.tcpInstance!.encryption.decrypt(buffer);
+    const decrypted = this.tcp!.encryption.decrypt(buffer);
     const packet = PacketUtils.decode(decrypted);
-    if (packet && this.tcpInstance) {
-      this.tcpInstance.queue.add(() =>
-        this.tcpInstance!.registry.handle(conn, packet)
-      );
+    if (packet && this.tcp) {
+      this.tcp.queue.add(() => this.tcp!.registry.handle(conn, packet));
       buffer = Buffer.alloc(0);
     }
   };
 
   private handleReceiveWs(data: WebSocket.Data, conn: Connection) {
-    const decrypted = this.wsInstance!.encryption.decrypt(
-      Buffer.from(data as Buffer)
-    );
+    const decrypted = this.ws!.encryption.decrypt(Buffer.from(data as Buffer));
     const packet = PacketUtils.decode(decrypted);
-    if (packet && this.wsInstance) {
-      this.wsInstance.queue.add(() =>
-        this.wsInstance!.registry.handle(conn, packet)
-      );
+    if (packet && this.ws) {
+      this.ws.queue.add(() => this.ws!.registry.handle(conn, packet));
     }
   }
 }

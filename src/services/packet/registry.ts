@@ -1,8 +1,12 @@
-import { getRegisteredHandlers } from "../common/decorators";
 import * as fs from "fs";
 import * as path from "path";
-import { Connection, Packet } from "../common/interfaces";
-import { Handler, HandlerEntry } from "../common/types";
+import {
+  Connection,
+  Handler,
+  HandlerEntry,
+  Packet,
+  getRegisteredHandlers,
+} from "../../common";
 
 export class PacketHandlerRegistry {
   private handlers = new Map<number, HandlerEntry>();

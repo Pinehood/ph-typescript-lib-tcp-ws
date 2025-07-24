@@ -1,4 +1,4 @@
-import { Packet } from "../common";
+import { Packet } from "../../common";
 
 export class PacketUtils {
   static encode(packet: Packet) {

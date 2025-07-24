@@ -9,11 +9,19 @@ import {
 } from "../common";
 import { Manager, PacketUtils } from "../services";
 
+export type WsNet = {
+  socket: WebSocket;
+  connection: Connection;
+};
+
+export type TcpNet = {
+  socket: net.Socket;
+  connection: Connection;
+};
+
 export class NetClient implements Client {
-  private tcpSocket?: net.Socket;
-  private wsSocket?: WebSocket;
-  private tcpConnection?: Connection;
-  private wsConnection?: Connection;
+  private tcp: TcpNet = {} as TcpNet;
+  private ws: WsNet = {} as WsNet;
   private retryCount = 0;
   private reconnectDelay = 1000;
   public readonly manager: Manager;
@@ -24,9 +32,9 @@ export class NetClient implements Client {
   ) {
     this.manager = new Manager();
     if (this.type === "tcp") {
-      this.tcpSocket = new net.Socket();
+      this.tcp.socket = new net.Socket();
     } else if (this.type === "ws") {
-      this.wsSocket = new WebSocket(
+      this.ws.socket = new WebSocket(
         `ws${this.options.secure ? "s" : ""}://${this.options.host}:${
           this.options.port
         }`
@@ -36,72 +44,72 @@ export class NetClient implements Client {
 
   async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.type === "tcp" && this.tcpSocket) {
-        this.tcpSocket.connect(this.options.port, this.options.host!, () => {
+      if (this.type === "tcp" && this.tcp.socket) {
+        this.tcp.socket.connect(this.options.port, this.options.host!, () => {
           this.retryCount = 0;
-          this.tcpConnection = {
+          this.tcp.connection = {
             id: `${this.options.host}:${this.options.port}`,
             format: this.options.format,
             send: (packet: Packet) => {
               this.send(packet);
             },
           };
-          this.options.handlers?.onConnect?.(this.tcpConnection);
+          this.options.handlers?.onConnect?.(this.tcp.connection);
           resolve();
         });
-        this.tcpSocket.on("error", (err) => {
-          this.options.handlers?.onError?.(this.tcpConnection!, err);
+        this.tcp.socket.on("error", (err) => {
+          this.options.handlers?.onError?.(this.tcp.connection!, err);
           reject(err);
         });
-      } else if (this.type === "ws" && this.wsSocket) {
-        this.wsSocket.on("open", () => {
+      } else if (this.type === "ws" && this.ws.socket) {
+        this.ws.socket.on("open", () => {
           this.retryCount = 0;
-          this.wsConnection = {
+          this.ws.connection = {
             id: `${this.options.host}:${this.options.port}`,
             format: this.options.format,
             send: (packet: Packet) => {
               this.send(packet);
             },
           };
-          this.options.handlers?.onConnect?.(this.wsConnection);
+          this.options.handlers?.onConnect?.(this.ws.connection);
           resolve();
         });
-        this.wsSocket.on("error", (err) => reject(err));
+        this.ws.socket.on("error", (err) => reject(err));
       }
     });
   }
 
   configure() {
-    if (this.type === "tcp" && this.tcpSocket) {
-      this.tcpSocket.on("error", (err) => {
-        this.options.handlers?.onError?.(this.tcpConnection!, err);
+    if (this.type === "tcp" && this.tcp.socket) {
+      this.tcp.socket.on("error", (err) => {
+        this.options.handlers?.onError?.(this.tcp.connection!, err);
         this.reconnect();
       });
-      this.tcpSocket.on("close", () => {
-        this.options.handlers?.onClose?.(this.tcpConnection!);
+      this.tcp.socket.on("close", () => {
+        this.options.handlers?.onClose?.(this.tcp.connection!);
         this.reconnect();
       });
-      this.tcpSocket.on("data", (dat) => this.handleData(dat));
-    } else if (this.type === "ws" && this.wsSocket) {
-      this.wsSocket.on("error", (err) => {
-        this.options.handlers?.onError?.(this.wsConnection!, err);
+      this.tcp.socket.on("data", (dat) => this.handleData(dat));
+    } else if (this.type === "ws" && this.ws.socket) {
+      this.ws.socket.on("error", (err) => {
+        this.options.handlers?.onError?.(this.ws.connection!, err);
         this.reconnect();
       });
-      this.wsSocket.on("close", () => {
-        this.options.handlers?.onClose?.(this.wsConnection!);
+      this.ws.socket.on("close", () => {
+        this.options.handlers?.onClose?.(this.ws.connection!);
         this.reconnect();
       });
-      this.wsSocket.on("message", (dat) => this.handleData(dat));
+      this.ws.socket.on("message", (dat) => this.handleData(dat));
     }
   }
 
   disconnect() {
     try {
-      if (this.type === "tcp" && this.tcpSocket) {
-        this.tcpSocket.end();
-        this.tcpSocket.destroy();
-      } else if (this.type === "ws" && this.wsSocket) {
-        this.wsSocket.close();
+      if (this.type === "tcp" && this.tcp.socket) {
+        this.tcp.socket.end();
+        this.tcp.socket.destroy();
+      } else if (this.type === "ws" && this.ws.socket) {
+        this.ws.socket.close();
       }
     } finally {
     }
@@ -118,10 +126,10 @@ export class NetClient implements Client {
   send(packet: Packet) {
     const raw = PacketUtils.encode(packet);
     const encrypted = this.options.encryption.encrypt(raw);
-    if (this.type === "tcp" && this.tcpSocket) {
-      this.tcpSocket.write(encrypted);
-    } else if (this.type === "ws" && this.wsSocket) {
-      this.wsSocket.send(encrypted);
+    if (this.type === "tcp" && this.tcp.socket) {
+      this.tcp.socket.write(encrypted);
+    } else if (this.type === "ws" && this.ws.socket) {
+      this.ws.socket.send(encrypted);
     }
   }
 
@@ -129,10 +137,10 @@ export class NetClient implements Client {
     const decrypted = this.options.encryption.decrypt(data as Buffer);
     const packet = PacketUtils.decode(decrypted);
     if (packet) {
-      if (this.type === "tcp" && this.tcpConnection) {
-        this.options.registry.handle(this.tcpConnection, packet);
-      } else if (this.type === "ws" && this.wsConnection) {
-        this.options.registry.handle(this.wsConnection, packet);
+      if (this.type === "tcp" && this.tcp.connection) {
+        this.options.registry.handle(this.tcp.connection, packet);
+      } else if (this.type === "ws" && this.ws.connection) {
+        this.options.registry.handle(this.ws.connection, packet);
       }
     }
   }

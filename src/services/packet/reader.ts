@@ -1,4 +1,4 @@
-import { getClassMetadata } from "../common/decorators";
+import { getClassMetadata } from "../../common";
 
 export class PacketReader {
   private view: DataView;

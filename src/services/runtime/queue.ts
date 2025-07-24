@@ -1,4 +1,4 @@
-import { Task } from "../common";
+import { Task } from "../../common";
 
 export class Queue {
   private concurrency: number;
