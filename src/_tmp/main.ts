@@ -43,7 +43,7 @@ const wsServer = () => {
       },
     },
   });
-  server.mngr.addUpdateLoop(new Loop(() => console.log("Hi TCP!")));
+  server.mngr.addUpdateLoop(new Loop(() => console.log("Hi WS!")));
   server.start();
   server.mngr.startUpdateLoops();
 };
