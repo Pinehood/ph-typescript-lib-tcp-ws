@@ -1,5 +1,5 @@
 import { NetClient } from "../net";
-import { Encryption, PacketHandlerRegistry, PacketWriter } from "../services";
+import { Encryption, PacketHandlerRegistry } from "../services";
 
 const encryption = new Encryption(
   Buffer.from("12345678901234567890123456789012", "utf-8"),
@@ -7,16 +7,6 @@ const encryption = new Encryption(
 );
 
 const registry = new PacketHandlerRegistry();
-
-// registry.register(0x02, (conn, packet) => {
-//   console.log(`Received packet with opcode 0x02 from server`);
-//   const json = packet.payload.toString();
-//   console.log(`Payload: ${json}`);
-//   conn.send({
-//     opcode: 0x01,
-//     payload: Buffer.from(JSON.stringify({ message: "Hello, again!" })),
-//   });
-// });
 
 async function tcpClient() {
   await registry.loadHandlersFrom(["./src/_tmp/handlers"]);
@@ -33,10 +23,6 @@ async function tcpClient() {
     opcode: 0x01,
     payload: Buffer.from([]),
   });
-  // client.send({
-  //   opcode: 0x01,
-  //   payload: Buffer.from(JSON.stringify({ message: "Hello, server!" })),
-  // });
 }
 
 async function wsClient() {
@@ -54,10 +40,6 @@ async function wsClient() {
     opcode: 0x01,
     payload: Buffer.from([]),
   });
-  // client.send({
-  //   opcode: 0x01,
-  //   payload: Buffer.from(JSON.stringify({ message: "Hello, server!" })),
-  // });
 }
 
 async function main() {

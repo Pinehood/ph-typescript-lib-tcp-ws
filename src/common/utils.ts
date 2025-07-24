@@ -1,5 +1,29 @@
 import { PacketReader, PacketWriter } from "../services";
 import { getClassMetadata } from "./decorators";
+import { Connection, Packet } from "./interfaces";
+
+export function writeData<T>(connection: Connection, opcode: number, data: T) {
+  return connection.send({
+    opcode,
+    payload: transformPacketPayloadForWrite(connection.format, data),
+  });
+}
+
+export function readData<T>(
+  connection: Connection,
+  packet: Packet,
+  type: new () => T
+) {
+  const transformed = transformPacketPayloadForRead(
+    connection.format,
+    packet.payload
+  );
+  if (connection.format === "bytes") {
+    const bytes = transformed as PacketReader;
+    return bytes.read<T>(type);
+  }
+  return transformed as T;
+}
 
 export function transformPacketPayloadForRead<T>(
   format: "json" | "bytes",
@@ -23,6 +47,7 @@ export function transformPacketPayloadForWrite<T>(
   }
   return Buffer.from(JSON.stringify(payload));
 }
+
 export function calculateSize(obj: any): number {
   let size = 0;
   const fields = getClassMetadata(obj, true);

@@ -24,13 +24,13 @@ export class NetClient implements Client {
   private ws: WsNet = {} as WsNet;
   private retryCount = 0;
   private reconnectDelay = 1000;
-  public readonly manager: Manager;
+  public readonly mngr: Manager;
 
   constructor(
     private readonly type: NetType,
     private readonly options: BaseInstanceOptions
   ) {
-    this.manager = new Manager();
+    this.mngr = new Manager();
     if (this.type === "tcp") {
       this.tcp.socket = new net.Socket();
     } else if (this.type === "ws") {

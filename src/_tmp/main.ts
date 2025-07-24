@@ -1,23 +1,11 @@
-import { getClassMetadata } from "../common";
 import { NetServer } from "../net";
 import { PacketHandlerRegistry, Encryption, Loop } from "../services";
-import { Position } from "./handlers/basic";
 
 const registry = new PacketHandlerRegistry();
 const encryption = new Encryption(
   Buffer.from("12345678901234567890123456789012", "utf-8"),
   Buffer.from("1234567890123456", "utf-8")
 );
-
-// registry.register(0x01, (conn, packet) => {
-//   console.log(`Received packet with opcode 0x01 from connection ${conn.id}`);
-//   const json = packet.payload.toString();
-//   console.log(`Payload: ${json}`);
-//   conn.send({
-//     opcode: 0x02,
-//     payload: Buffer.from(JSON.stringify({ message: "Hello, client!" })),
-//   });
-// });
 
 const tcpServer = () => {
   const server = new NetServer("tcp", {

@@ -1,8 +1,10 @@
 import {
   Connection,
   Packet,
+  readData,
   transformPacketPayloadForRead,
   transformPacketPayloadForWrite,
+  writeData,
 } from "../../common";
 import { PacketReader, PacketWriter } from "../../services";
 import { Field, PacketHandler } from "../../common/decorators";
@@ -24,10 +26,7 @@ class BasicHandlers {
   @PacketHandler(0x01)
   test1(conn: Connection, packet: Packet) {
     console.log("Basic packet 1");
-    conn.send({
-      opcode: 0x02,
-      payload: transformPacketPayloadForWrite(conn.format, new Position(1, 2)),
-    });
+    writeData(conn, 0x02, new Position(1, 2));
   }
 
   @PacketHandler(0x02)
@@ -36,12 +35,9 @@ class BasicHandlers {
       "bytes",
       packet.payload
     ) as PacketReader;
-    const readPos = transformed.read<Position>(Position);
+    const readPos = readData<Position>(conn, packet, Position);
     console.log("Basic packet 2: ", readPos.x, readPos.y);
-    conn.send({
-      opcode: 0x01,
-      payload: transformPacketPayloadForWrite(conn.format, new Position(2, 1)),
-    });
+    writeData(conn, 0x01, new Position(2, 1));
   }
 }
 
