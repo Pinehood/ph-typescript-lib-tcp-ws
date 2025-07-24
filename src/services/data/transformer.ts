@@ -1,0 +1,50 @@
+import { Connection, Packet } from "../../common";
+import { PacketReader, PacketWriter } from "../packet";
+
+export class Transformer {
+  static writeData<T>(connection: Connection, opcode: number, data: T) {
+    return connection.send({
+      opcode,
+      payload: this.transformPacketPayloadForWrite(connection.format, data),
+    });
+  }
+
+  static readData<T>(
+    connection: Connection,
+    packet: Packet,
+    type: new () => T
+  ) {
+    const transformed = this.transformPacketPayloadForRead(
+      connection.format,
+      packet.payload
+    );
+    if (connection.format === "bytes") {
+      const bytes = transformed as PacketReader;
+      return bytes.read<T>(type);
+    }
+    return transformed as T;
+  }
+
+  private static transformPacketPayloadForRead<T>(
+    format: "json" | "bytes",
+    payload: Buffer
+  ) {
+    if (format === "bytes") {
+      return new PacketReader(payload);
+    }
+    return JSON.parse(payload.toString()) as T;
+  }
+
+  private static transformPacketPayloadForWrite<T>(
+    format: "json" | "bytes",
+    payload: PacketWriter | Buffer | any
+  ) {
+    if (format === "bytes") {
+      if (payload instanceof PacketWriter) {
+        return Buffer.from(payload.write());
+      }
+      return Buffer.from(new PacketWriter(payload).write());
+    }
+    return Buffer.from(JSON.stringify(payload));
+  }
+}

@@ -1,4 +1,5 @@
-import { calculateSize, getClassMetadata } from "../../common";
+import { getClassMetadata } from "../../common";
+import { Calculator } from "../data";
 
 export class PacketWriter {
   private buffer: ArrayBuffer;
@@ -6,7 +7,7 @@ export class PacketWriter {
   private offset = 0;
 
   constructor(private obj?: any) {
-    const size = obj ? calculateSize(obj) : 2048;
+    const size = obj ? Calculator.calculateObjectSize(obj) : 2048;
     this.buffer = new ArrayBuffer(size);
     this.view = new DataView(this.buffer);
   }
