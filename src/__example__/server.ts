@@ -15,11 +15,11 @@ const createServer = async (
     encryption,
     format,
     handlers: {
-      onConnect(connection) {
-        console.log("Connected", connection.id);
+      onConnect(connection, logger) {
+        logger.info("Connected", connection.id);
       },
-      onError(connection, error) {
-        console.error("Error", connection.id, error);
+      onError(connection, error, logger) {
+        logger.error("Error", connection.id, error);
       },
     },
   });
@@ -29,7 +29,7 @@ const main = async () => {
   const server = await createServer();
   server.start();
 
-  const loop = new Loop(() => console.log("Hi from loop"), 10000, true);
+  const loop = new Loop(() => server.logger.info("Hi from loop"), 10000, true);
   server.mngr.addUpdateLoop(loop);
   server.mngr.startUpdateLoops();
 };

@@ -58,16 +58,16 @@ export class NetServer implements Server {
           send: (packet) => this.handleSendTcp(socket, packet),
         };
         this.tcp?.pool.add(conn);
-        this.tcp?.handlers?.onConnect?.(conn);
+        this.tcp?.handlers?.onConnect?.(conn, this.logger);
         let buffer = Buffer.alloc(0);
         socket.on("data", (dat) => this.handleReceiveTcp(buffer, dat, conn));
         socket.on("close", () => {
           this.tcp?.pool.remove(id);
-          this.tcp?.handlers?.onClose?.(conn);
+          this.tcp?.handlers?.onClose?.(conn, this.logger);
         });
         socket.on("error", (err) => {
           this.tcp?.pool.remove(id);
-          this.tcp?.handlers?.onError?.(conn, err);
+          this.tcp?.handlers?.onError?.(conn, err, this.logger);
         });
       });
       this.tcp.server.listen(this.tcp.port);
@@ -83,15 +83,15 @@ export class NetServer implements Server {
           send: (packet: Packet) => this.handleSendWs(socket, packet),
         };
         this.ws?.pool.add(conn);
-        this.ws?.handlers?.onClose?.(conn);
+        this.ws?.handlers?.onClose?.(conn, this.logger);
         socket.on("message", (dat) => this.handleReceiveWs(dat, conn));
         socket.on("close", () => {
           this.ws?.pool.remove(id);
-          this.ws?.handlers?.onClose?.(conn);
+          this.ws?.handlers?.onClose?.(conn, this.logger);
         });
         socket.on("error", (err) => {
           this.ws?.pool.remove(id);
-          this.ws?.handlers?.onError?.(conn, err);
+          this.ws?.handlers?.onError?.(conn, err, this.logger);
         });
       });
     }

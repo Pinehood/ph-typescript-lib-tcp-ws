@@ -58,11 +58,15 @@ export class NetClient implements Client {
               this.send(packet);
             },
           };
-          this.options.handlers?.onConnect?.(this.tcp.connection);
+          this.options.handlers?.onConnect?.(this.tcp.connection, this.logger);
           resolve();
         });
         this.tcp.socket.on("error", (err) => {
-          this.options.handlers?.onError?.(this.tcp.connection!, err);
+          this.options.handlers?.onError?.(
+            this.tcp.connection!,
+            err,
+            this.logger
+          );
           reject(err);
         });
       } else if (this.type === "ws" && this.ws.socket) {
@@ -75,7 +79,7 @@ export class NetClient implements Client {
               this.send(packet);
             },
           };
-          this.options.handlers?.onConnect?.(this.ws.connection);
+          this.options.handlers?.onConnect?.(this.ws.connection, this.logger);
           resolve();
         });
         this.ws.socket.on("error", (err) => reject(err));
@@ -86,21 +90,25 @@ export class NetClient implements Client {
   configure() {
     if (this.type === "tcp" && this.tcp.socket) {
       this.tcp.socket.on("error", (err) => {
-        this.options.handlers?.onError?.(this.tcp.connection!, err);
+        this.options.handlers?.onError?.(
+          this.tcp.connection!,
+          err,
+          this.logger
+        );
         this.reconnect();
       });
       this.tcp.socket.on("close", () => {
-        this.options.handlers?.onClose?.(this.tcp.connection!);
+        this.options.handlers?.onClose?.(this.tcp.connection!, this.logger);
         this.reconnect();
       });
       this.tcp.socket.on("data", (dat) => this.handleData(dat));
     } else if (this.type === "ws" && this.ws.socket) {
       this.ws.socket.on("error", (err) => {
-        this.options.handlers?.onError?.(this.ws.connection!, err);
+        this.options.handlers?.onError?.(this.ws.connection!, err, this.logger);
         this.reconnect();
       });
       this.ws.socket.on("close", () => {
-        this.options.handlers?.onClose?.(this.ws.connection!);
+        this.options.handlers?.onClose?.(this.ws.connection!, this.logger);
         this.reconnect();
       });
       this.ws.socket.on("message", (dat) => this.handleData(dat));

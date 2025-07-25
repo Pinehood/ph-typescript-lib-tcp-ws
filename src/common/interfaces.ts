@@ -34,9 +34,13 @@ export interface BaseInstanceOptions {
   format: "json" | "bytes";
   secure?: boolean;
   handlers?: Partial<{
-    onConnect: (connection: Connection) => void;
-    onError: (connection: Connection, error: unknown) => void;
-    onClose: (connection: Connection) => void;
+    onConnect: (connection: Connection, logger: LoggerService) => void;
+    onError: (
+      connection: Connection,
+      error: unknown,
+      logger: LoggerService
+    ) => void;
+    onClose: (connection: Connection, logger: LoggerService) => void;
   }>;
 }
 
