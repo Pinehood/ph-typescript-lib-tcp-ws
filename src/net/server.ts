@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from "uuid";
 import {
   BaseInstanceOptions,
   Connection,
+  Handler,
+  InstanceEventHandlers,
   LoggerService,
   NetType,
   Packet,
@@ -46,6 +48,10 @@ export class NetServer implements Server {
         queue,
       };
     }
+  }
+
+  get format() {
+    return this.options.format;
   }
 
   start() {
@@ -105,6 +111,30 @@ export class NetServer implements Server {
       this.ws.server?.close();
       this.ws.server = null;
     }
+  }
+
+  sendTo(conn: "all" | Connection | Connection[], packet: Packet): void {
+    if (conn === "all") {
+      const connections = this.tcp?.pool.list();
+      if (connections?.length) {
+        connections.forEach((c) => (!!c ? c.send(packet) : () => null));
+      }
+    } else if (Array.isArray(conn) && conn.length) {
+      conn.forEach((c) => (!!c ? c.send(packet) : () => null));
+    } else if (!Array.isArray(conn) && typeof conn === "object") {
+      conn.send(packet);
+    }
+  }
+
+  updateEventHandlers(handlers: Partial<InstanceEventHandlers>): void {
+    this.options.handlers = {
+      ...(this.options.handlers ?? {}),
+      ...(handlers ?? {}),
+    };
+  }
+
+  addPacketHandler(opcode: number, handler: Handler): void {
+    this.options.registry.register(opcode, handler);
   }
 
   private handleSendTcp = (socket: net.Socket, packet: Packet) => {

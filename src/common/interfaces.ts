@@ -1,5 +1,5 @@
 import { ConnectionPool, Encryption, PacketRegistry, Queue } from "../services";
-import { NetFormat } from "./types";
+import { Handler, NetFormat } from "./types";
 
 export interface Packet {
   opcode: number;
@@ -14,16 +14,33 @@ export interface Connection {
 }
 
 export interface Client {
-  connect(): Promise<void> | void;
-  configure(): Promise<void> | void;
-  disconnect(): Promise<void> | void;
-  reconnect(): Promise<void> | void;
-  send(packet: Packet): Promise<void> | void;
+  get format(): NetFormat;
+  connect(): void;
+  configure(): void;
+  disconnect(): void;
+  reconnect(): void;
+  send(packet: Packet): void;
+  updateEventHandlers(handlers: Partial<InstanceEventHandlers>): void;
+  addPacketHandler(opcode: number, handler: Handler): void;
 }
 
 export interface Server {
-  start(): Promise<void> | void;
-  stop(): Promise<void> | void;
+  get format(): NetFormat;
+  start(): void;
+  stop(): void;
+  sendTo(conn: "all" | Connection | Connection[], packet: Packet): void;
+  updateEventHandlers(handlers: Partial<InstanceEventHandlers>): void;
+  addPacketHandler(opcode: number, handler: Handler): void;
+}
+
+export interface InstanceEventHandlers {
+  onConnect: (connection: Connection, logger: LoggerService) => void;
+  onError: (
+    connection: Connection,
+    error: unknown,
+    logger: LoggerService
+  ) => void;
+  onClose: (connection: Connection, logger: LoggerService) => void;
 }
 
 export interface BaseInstanceOptions {
@@ -33,15 +50,7 @@ export interface BaseInstanceOptions {
   encryption: Encryption;
   format: "json" | "bytes";
   secure?: boolean;
-  handlers?: Partial<{
-    onConnect: (connection: Connection, logger: LoggerService) => void;
-    onError: (
-      connection: Connection,
-      error: unknown,
-      logger: LoggerService
-    ) => void;
-    onClose: (connection: Connection, logger: LoggerService) => void;
-  }>;
+  handlers?: Partial<InstanceEventHandlers>;
 }
 
 export interface ServerInstance<T> extends BaseInstanceOptions {

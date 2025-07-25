@@ -1,6 +1,7 @@
 import { NetType, NetFormat } from "../common";
 import { NetClient } from "../net";
-import { Loop } from "../services";
+import { Loop, Transformer } from "../services";
+import { Message, PacketOpcodes } from "./data";
 import { getSharedData } from "./shared";
 
 const createClient = async (
@@ -18,18 +19,51 @@ const createClient = async (
   });
 };
 
+const createAndEnableUpdateLoop = (client: NetClient) => {
+  const loop = new Loop(
+    () => {
+      const msg = "Hi from client loop";
+      client.logger.info(msg);
+      client.send({
+        opcode: PacketOpcodes.FROM_UPDATE_LOOP,
+        payload: Transformer.transformPacketPayloadForWrite(
+          client.format,
+          new Message(msg)
+        ),
+      });
+    },
+    10000,
+    true
+  );
+  client.mngr.addUpdateLoop(loop);
+  client.mngr.startUpdateLoops();
+};
+
+const dynamicHandlerUpdates = (client: NetClient) => {
+  client.updateEventHandlers({
+    onClose(connection, logger) {
+      logger.warn("Closed", connection.id);
+    },
+  });
+  client.addPacketHandler(
+    PacketOpcodes.FROM_UPDATE_LOOP,
+    (conn, packet, logger) => {
+      const data = Transformer.readData<Message>(conn, packet, Message);
+      logger.info("" + PacketOpcodes.FROM_UPDATE_LOOP, conn.id, data);
+    }
+  );
+};
+
 const main = async () => {
   const client = await createClient();
   await client.connect();
   client.configure();
-
-  const loop = new Loop(() => console.log("Hi from loop"), 10000, true);
-  client.mngr.addUpdateLoop(loop);
-  client.mngr.startUpdateLoops();
+  createAndEnableUpdateLoop(client);
   client.send({
-    opcode: 0x01,
+    opcode: PacketOpcodes.INITIAL,
     payload: Buffer.from([]),
   });
+  dynamicHandlerUpdates(client);
 };
 
 main();

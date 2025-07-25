@@ -25,17 +25,14 @@ export class Transformer {
     return transformed as T;
   }
 
-  private static transformPacketPayloadForRead<T>(
-    format: NetFormat,
-    payload: Buffer
-  ) {
+  static transformPacketPayloadForRead<T>(format: NetFormat, payload: Buffer) {
     if (format === "bytes") {
       return new PacketReader(payload);
     }
     return JSON.parse(payload.toString()) as T;
   }
 
-  private static transformPacketPayloadForWrite<T>(
+  static transformPacketPayloadForWrite<T>(
     format: NetFormat,
     payload: PacketWriter | Buffer | any
   ) {

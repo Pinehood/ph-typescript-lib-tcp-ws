@@ -4,6 +4,8 @@ import {
   BaseInstanceOptions,
   Client,
   Connection,
+  Handler,
+  InstanceEventHandlers,
   LoggerService,
   NetType,
   Packet,
@@ -44,6 +46,10 @@ export class NetClient implements Client {
         }`
       );
     }
+  }
+
+  get format() {
+    return this.options.format;
   }
 
   async connect(): Promise<void> {
@@ -143,6 +149,17 @@ export class NetClient implements Client {
     } else if (this.type === "ws" && this.ws.socket) {
       this.ws.socket.send(encrypted);
     }
+  }
+
+  updateEventHandlers(handlers: Partial<InstanceEventHandlers>): void {
+    this.options.handlers = {
+      ...(this.options.handlers ?? {}),
+      ...(handlers ?? {}),
+    };
+  }
+
+  addPacketHandler(opcode: number, handler: Handler): void {
+    this.options.registry.register(opcode, handler);
   }
 
   private handleData(data: Buffer | WebSocket.Data) {
