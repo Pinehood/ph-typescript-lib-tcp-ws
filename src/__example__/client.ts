@@ -26,6 +26,10 @@ const main = async () => {
   const loop = new Loop(() => console.log("Hi from loop"), 10000, true);
   client.mngr.addUpdateLoop(loop);
   client.mngr.startUpdateLoops();
+  client.send({
+    opcode: 0x01,
+    payload: Buffer.from([]),
+  });
 };
 
 main();
