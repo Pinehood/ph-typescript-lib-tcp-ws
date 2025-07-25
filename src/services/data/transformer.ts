@@ -1,4 +1,4 @@
-import { Connection, Packet } from "../../common";
+import { Connection, NetFormat, Packet } from "../../common";
 import { PacketReader, PacketWriter } from "../packet";
 
 export class Transformer {
@@ -12,7 +12,7 @@ export class Transformer {
   static readData<T>(
     connection: Connection,
     packet: Packet,
-    type: new () => T
+    type?: new () => T
   ) {
     const transformed = this.transformPacketPayloadForRead(
       connection.format,
@@ -20,13 +20,13 @@ export class Transformer {
     );
     if (connection.format === "bytes") {
       const bytes = transformed as PacketReader;
-      return bytes.read<T>(type);
+      return bytes.read<T>(type!);
     }
     return transformed as T;
   }
 
   private static transformPacketPayloadForRead<T>(
-    format: "json" | "bytes",
+    format: NetFormat,
     payload: Buffer
   ) {
     if (format === "bytes") {
@@ -36,7 +36,7 @@ export class Transformer {
   }
 
   private static transformPacketPayloadForWrite<T>(
-    format: "json" | "bytes",
+    format: NetFormat,
     payload: PacketWriter | Buffer | any
   ) {
     if (format === "bytes") {

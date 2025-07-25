@@ -1,5 +1,5 @@
 import { ConnectionPool, Encryption, PacketRegistry, Queue } from "../services";
-import { BasicType } from "./types";
+import { NetFormat } from "./types";
 
 export interface Packet {
   opcode: number;
@@ -9,7 +9,7 @@ export interface Packet {
 export interface Connection {
   id: string;
   send(packet: Packet): Promise<void> | void;
-  format: "json" | "bytes";
+  format: NetFormat;
   metadata?: any;
 }
 
@@ -46,10 +46,9 @@ export interface ServerInstance<T> extends BaseInstanceOptions {
   server?: T | null;
 }
 
-export interface FieldMetadata {
-  key: string;
-  type: BasicType;
-  structType?: any;
-  enumMap?: any;
-  arrayLength?: number;
+export interface LoggerService {
+  info(message: string, ...optionalParams: unknown[]): void;
+  warn(message: string, ...optionalParams: unknown[]): void;
+  error(message: string, ...optionalParams: unknown[]): void;
+  debug(message: string, ...optionalParams: unknown[]): void;
 }

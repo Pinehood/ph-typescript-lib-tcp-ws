@@ -1,8 +1,9 @@
-import { Connection, Packet } from "./interfaces";
+import { Connection, LoggerService, Packet } from "./interfaces";
 
 export type Handler = (
   conn: Connection,
-  packet: Packet
+  packet: Packet,
+  logger: LoggerService
 ) => Promise<void> | void;
 
 export type HandlerEntry = {
@@ -12,6 +13,8 @@ export type HandlerEntry = {
 };
 
 export type NetType = "tcp" | "ws";
+export type NetFormat = "json" | "bytes";
+export type LogLevel = "info" | "warn" | "error" | "debug";
 
 export type Task<T> = {
   fn: () => T | Promise<T>;
@@ -38,4 +41,12 @@ export type HandlerMeta = {
   opcode: number;
   methodName: string;
   targetClass: any;
+};
+
+export type FieldMeta = {
+  key: string;
+  type: BasicType;
+  structType?: any;
+  enumMap?: any;
+  arrayLength?: number;
 };

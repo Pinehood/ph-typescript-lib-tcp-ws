@@ -4,25 +4,35 @@ import { v4 as uuidv4 } from "uuid";
 import {
   BaseInstanceOptions,
   Connection,
+  LoggerService,
   NetType,
   Packet,
   Server,
   ServerInstance,
 } from "../common";
-import { ConnectionPool, Manager, PacketEncoder, Queue } from "../services";
+import {
+  ConnectionPool,
+  Manager,
+  PacketEncoder,
+  Queue,
+  Logger,
+} from "../services";
 
 export class NetServer implements Server {
   private tcp?: ServerInstance<net.Server>;
   private ws?: ServerInstance<WebSocket.Server>;
   public readonly mngr: Manager;
+  public readonly logger: LoggerService;
 
   constructor(
     private readonly type: NetType,
-    private readonly options: BaseInstanceOptions
+    private readonly options: BaseInstanceOptions,
+    logger?: LoggerService
   ) {
     const pool = new ConnectionPool();
     const queue = new Queue();
     this.mngr = new Manager();
+    this.logger = logger ?? new Logger();
     if (this.type === "tcp") {
       this.tcp = {
         ...options,
@@ -118,7 +128,9 @@ export class NetServer implements Server {
     const decrypted = this.tcp!.encryption.decrypt(buffer);
     const packet = PacketEncoder.decode(decrypted);
     if (packet && this.tcp) {
-      this.tcp.queue.add(() => this.tcp!.registry.handle(conn, packet));
+      this.tcp.queue.add(() =>
+        this.tcp!.registry.handle(conn, packet, this.logger)
+      );
       buffer = Buffer.alloc(0);
     }
   };
@@ -127,7 +139,9 @@ export class NetServer implements Server {
     const decrypted = this.ws!.encryption.decrypt(Buffer.from(data as Buffer));
     const packet = PacketEncoder.decode(decrypted);
     if (packet && this.ws) {
-      this.ws.queue.add(() => this.ws!.registry.handle(conn, packet));
+      this.ws.queue.add(() =>
+        this.ws!.registry.handle(conn, packet, this.logger)
+      );
     }
   }
 }

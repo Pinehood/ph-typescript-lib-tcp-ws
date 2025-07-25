@@ -1,7 +1,6 @@
-import { FieldMetadata } from "./interfaces";
-import { BasicType, HandlerMeta } from "./types";
+import { BasicType, HandlerMeta, FieldMeta } from "./types";
 
-const classMetadata = new WeakMap<any, FieldMetadata[]>();
+const classMetadata = new WeakMap<any, FieldMeta[]>();
 const handlerRegistry: HandlerMeta[] = [];
 
 export function Field(
@@ -11,7 +10,7 @@ export function Field(
 ): PropertyDecorator {
   return (target, propertyKey) => {
     const ctor = target.constructor;
-    const meta: FieldMetadata[] = classMetadata.get(ctor) || [];
+    const meta: FieldMeta[] = classMetadata.get(ctor) || [];
     meta.push({
       key: propertyKey as string,
       type,
@@ -43,10 +42,7 @@ export function getRegisteredHandlers(): HandlerMeta[] {
   return handlerRegistry;
 }
 
-export function getClassMetadata(
-  target: any,
-  isCtor: boolean
-): FieldMetadata[] {
+export function getClassMetadata(target: any, isCtor: boolean): FieldMeta[] {
   const ctor = isCtor ? Object.getPrototypeOf(target).constructor : target;
   const fromMap = classMetadata.get(ctor);
   if (fromMap) return fromMap;

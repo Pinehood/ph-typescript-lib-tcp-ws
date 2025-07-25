@@ -4,10 +4,11 @@ import {
   BaseInstanceOptions,
   Client,
   Connection,
+  LoggerService,
   NetType,
   Packet,
 } from "../common";
-import { Manager, PacketEncoder } from "../services";
+import { Logger, Manager, PacketEncoder } from "../services";
 
 export type WsNet = {
   socket: WebSocket;
@@ -25,12 +26,15 @@ export class NetClient implements Client {
   private retryCount = 0;
   private reconnectDelay = 1000;
   public readonly mngr: Manager;
+  public readonly logger: LoggerService;
 
   constructor(
     private readonly type: NetType,
-    private readonly options: BaseInstanceOptions
+    private readonly options: BaseInstanceOptions,
+    logger?: LoggerService
   ) {
     this.mngr = new Manager();
+    this.logger = logger ?? new Logger();
     if (this.type === "tcp") {
       this.tcp.socket = new net.Socket();
     } else if (this.type === "ws") {
@@ -138,9 +142,9 @@ export class NetClient implements Client {
     const packet = PacketEncoder.decode(decrypted);
     if (packet) {
       if (this.type === "tcp" && this.tcp.connection) {
-        this.options.registry.handle(this.tcp.connection, packet);
+        this.options.registry.handle(this.tcp.connection, packet, this.logger);
       } else if (this.type === "ws" && this.ws.connection) {
-        this.options.registry.handle(this.ws.connection, packet);
+        this.options.registry.handle(this.ws.connection, packet, this.logger);
       }
     }
   }

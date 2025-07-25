@@ -4,6 +4,7 @@ import {
   Connection,
   Handler,
   HandlerEntry,
+  LoggerService,
   Packet,
   getRegisteredHandlers,
 } from "../../common";
@@ -52,9 +53,9 @@ export class PacketRegistry {
     }
   }
 
-  handle(conn: Connection, packet: Packet) {
+  handle(conn: Connection, packet: Packet, logger: LoggerService) {
     const entry = this.handlers.get(packet.opcode);
     if (!entry) throw new Error(`No handler for opcode ${packet.opcode}`);
-    return entry.handlerFn(conn, packet);
+    return entry.handlerFn(conn, packet, logger);
   }
 }
