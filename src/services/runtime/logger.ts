@@ -2,19 +2,19 @@ import { LoggerService, LogLevel } from "../../common";
 
 export class Logger implements LoggerService {
   info(message: string, ...optionalParams: unknown[]): void {
-    this.message(message, "info", optionalParams);
+    this.message(message, "info", ...optionalParams);
   }
 
   warn(message: string, ...optionalParams: unknown[]): void {
-    this.message(message, "warn", optionalParams);
+    this.message(message, "warn", ...optionalParams);
   }
 
   error(message: string, ...optionalParams: unknown[]): void {
-    this.message(message, "error", optionalParams);
+    this.message(message, "error", ...optionalParams);
   }
 
   debug(message: string, ...optionalParams: unknown[]): void {
-    this.message(message, "debug", optionalParams);
+    this.message(message, "debug", ...optionalParams);
   }
 
   private message(
@@ -25,13 +25,13 @@ export class Logger implements LoggerService {
     const caller = this.caller();
     const msg = `[${new Date().toISOString()}] [${level.toUpperCase()}] ${caller} ${message}`;
     if (level === "warn") {
-      console.warn(msg, optionalParams);
+      console.warn(msg, ...optionalParams);
     } else if (level === "error") {
-      console.error(msg, optionalParams);
+      console.error(msg, ...optionalParams);
     } else if (level == "info") {
-      console.log(msg, optionalParams);
+      console.log(msg, ...optionalParams);
     } else if (level == "debug") {
-      console.debug(msg, optionalParams);
+      console.debug(msg, ...optionalParams);
     }
   }
 
