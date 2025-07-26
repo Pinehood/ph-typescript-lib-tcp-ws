@@ -3,24 +3,15 @@ import WebSocket from "ws";
 import {
   BaseInstanceOptions,
   Client,
-  Connection,
   Handler,
   InstanceEventHandlers,
   LoggerService,
   NetType,
   Packet,
+  TcpNet,
+  WsNet,
 } from "../common";
 import { Logger, Manager, PacketEncoder } from "../services";
-
-export type WsNet = {
-  socket: WebSocket;
-  connection: Connection;
-};
-
-export type TcpNet = {
-  socket: net.Socket;
-  connection: Connection;
-};
 
 export class NetClient implements Client {
   private tcp: TcpNet = {} as TcpNet;
@@ -93,7 +84,7 @@ export class NetClient implements Client {
     });
   }
 
-  configure() {
+  configure(): void {
     if (this.type === "tcp" && this.tcp.socket) {
       this.tcp.socket.on("error", (err) => {
         this.options.handlers?.onError?.(
@@ -121,7 +112,7 @@ export class NetClient implements Client {
     }
   }
 
-  disconnect() {
+  disconnect(): void {
     try {
       if (this.type === "tcp" && this.tcp.socket) {
         this.tcp.socket.end();
@@ -133,7 +124,7 @@ export class NetClient implements Client {
     }
   }
 
-  reconnect() {
+  reconnect(): void {
     if (this.retryCount++ >= 5) {
       return;
     }
@@ -141,7 +132,7 @@ export class NetClient implements Client {
     this.reconnectDelay *= 2;
   }
 
-  send(packet: Packet) {
+  send(packet: Packet): void {
     const raw = PacketEncoder.encode(packet);
     const encrypted = this.options.encryption.encrypt(raw);
     if (this.type === "tcp" && this.tcp.socket) {
@@ -162,7 +153,7 @@ export class NetClient implements Client {
     this.options.registry.register(opcode, handler);
   }
 
-  private handleData(data: Buffer | WebSocket.Data) {
+  private handleData(data: Buffer | WebSocket.Data): void {
     const decrypted = this.options.encryption.decrypt(data as Buffer);
     const packet = PacketEncoder.decode(decrypted);
     if (packet) {

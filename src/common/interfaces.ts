@@ -8,7 +8,7 @@ export interface Packet {
 
 export interface Connection {
   id: string;
-  send(packet: Packet): Promise<void> | void;
+  send(packet: Packet): void;
   format: NetFormat;
   metadata?: any;
 }

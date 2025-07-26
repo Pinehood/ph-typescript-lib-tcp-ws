@@ -16,20 +16,20 @@ export class Loop {
     }
   }
 
-  id() {
+  id(): string {
     return this.loopId;
   }
 
-  running() {
+  running(): boolean {
     return this.isRunning;
   }
 
-  start() {
+  start(): void {
     this.instance = setInterval(this.fn, this.interval);
     this.isRunning = true;
   }
 
-  stop() {
+  stop(): void {
     if (this.instance) {
       clearInterval(this.instance);
       this.instance = null;
@@ -37,7 +37,7 @@ export class Loop {
     }
   }
 
-  get() {
+  get(): NodeJS.Timeout | null {
     return this.instance;
   }
 }

@@ -20,11 +20,6 @@ export function Field(
       arrayLength: type === "array" ? options?.length : undefined,
     });
     classMetadata.set(ctor, meta);
-    Object.defineProperty(ctor, "__packetFields", {
-      value: meta,
-      enumerable: false,
-      configurable: true,
-    });
   };
 }
 
@@ -46,5 +41,5 @@ export function getClassMetadata(target: any, isCtor: boolean): FieldMeta[] {
   const ctor = isCtor ? Object.getPrototypeOf(target).constructor : target;
   const fromMap = classMetadata.get(ctor);
   if (fromMap) return fromMap;
-  return (ctor as any).__packetFields || [];
+  return [];
 }

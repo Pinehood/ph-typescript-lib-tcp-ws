@@ -1,3 +1,5 @@
+import net from "net";
+import WebSocket from "ws";
 import { Connection, LoggerService, Packet } from "./interfaces";
 
 export type Handler = (
@@ -49,4 +51,14 @@ export type FieldMeta = {
   structType?: any;
   enumMap?: any;
   arrayLength?: number;
+};
+
+export type WsNet = {
+  socket: WebSocket;
+  connection: Connection;
+};
+
+export type TcpNet = {
+  socket: net.Socket;
+  connection: Connection;
 };

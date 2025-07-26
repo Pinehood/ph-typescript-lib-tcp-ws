@@ -87,7 +87,7 @@ export class PacketReader {
     return obj;
   }
 
-  private readPrimitive(type: string): any {
+  private readPrimitive(type: string): unknown {
     switch (type) {
       case "uint8":
         return this.view.getUint8(this.offset++);

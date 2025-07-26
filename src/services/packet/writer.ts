@@ -19,7 +19,7 @@ export class PacketWriter {
     return this.buffer.slice(0, this.offset);
   }
 
-  private writeStruct(obj: any) {
+  private writeStruct(obj: any): void {
     const fields = getClassMetadata(obj, true);
     for (const field of fields) {
       const value = obj[field.key];
@@ -81,7 +81,7 @@ export class PacketWriter {
     }
   }
 
-  private writePrimitive(value: any, type: string) {
+  private writePrimitive(value: any, type: string): void {
     switch (type) {
       case "uint8":
         this.view.setUint8(this.offset++, value);

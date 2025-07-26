@@ -28,11 +28,11 @@ export class Queue {
     });
   }
 
-  private sortQueue() {
+  private sortQueue(): void {
     this.queue.sort((a, b) => b.priority - a.priority);
   }
 
-  private async next() {
+  private async next(): Promise<void> {
     if (this.activeCount >= this.concurrency || this.queue.length === 0) return;
 
     const task = this.queue.shift();

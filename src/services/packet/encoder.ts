@@ -1,14 +1,14 @@
 import { Packet } from "../../common";
 
 export class PacketEncoder {
-  static encode(packet: Packet) {
+  static encode(packet: Packet): Buffer {
     const header = Buffer.alloc(6);
     header.writeUInt16BE(packet.opcode, 0);
     header.writeUInt32BE(packet.payload.length, 2);
     return Buffer.concat([header, packet.payload]);
   }
 
-  static decode(buffer: Buffer) {
+  static decode(buffer: Buffer): Packet | null {
     if (buffer.length < 6) {
       return null;
     }

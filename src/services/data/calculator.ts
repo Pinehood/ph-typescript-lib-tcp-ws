@@ -34,11 +34,11 @@ export class Calculator {
         case "array": {
           const arr = value || [];
           for (let i = 0; i < (field.arrayLength || arr.length); i++) {
-            const item = arr[i] ?? this.getDefault(field.structType);
+            const item = arr[i] ?? this.getDefaultValue(field.structType);
             if (typeof item === "object") {
               size += this.calculateObjectSize(item);
             } else {
-              size += this.getPrimitiveSize(field.structType);
+              size += this.calculatePrimitiveSize(field.structType);
             }
           }
           break;
@@ -48,7 +48,7 @@ export class Calculator {
     return size;
   }
 
-  private static getPrimitiveSize(type: string): number {
+  private static calculatePrimitiveSize(type: string): number {
     switch (type) {
       case "bool":
       case "uint8":
@@ -66,7 +66,7 @@ export class Calculator {
     }
   }
 
-  private static getDefault(type: any): any {
+  private static getDefaultValue(type: any): unknown {
     if (typeof type === "string") {
       switch (type) {
         case "bool":

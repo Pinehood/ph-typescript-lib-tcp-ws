@@ -12,11 +12,15 @@ import {
 export class PacketRegistry {
   private handlers = new Map<number, HandlerEntry>();
 
-  register(opcode: number, handler: Handler, payloadClass?: new () => any) {
+  register(
+    opcode: number,
+    handler: Handler,
+    payloadClass?: new () => any
+  ): void {
     this.handlers.set(opcode, { opcode, handlerFn: handler, payloadClass });
   }
 
-  async loadHandlersFrom(sources: (string | (new () => any))[]) {
+  async loadHandlersFrom(sources: (string | (new () => any))[]): Promise<void> {
     for (const source of sources) {
       if (typeof source === "string") {
         const absPath = path.resolve(source);
@@ -53,7 +57,11 @@ export class PacketRegistry {
     }
   }
 
-  handle(conn: Connection, packet: Packet, logger: LoggerService) {
+  handle(
+    conn: Connection,
+    packet: Packet,
+    logger: LoggerService
+  ): void | Promise<void> {
     const entry = this.handlers.get(packet.opcode);
     if (!entry) throw new Error(`No handler for opcode ${packet.opcode}`);
     return entry.handlerFn(conn, packet, logger);

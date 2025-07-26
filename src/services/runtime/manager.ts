@@ -7,11 +7,11 @@ export class Manager {
     this.updateLoops = [];
   }
 
-  addUpdateLoop(loop: Loop) {
+  addUpdateLoop(loop: Loop): void {
     this.updateLoops.push(loop);
   }
 
-  removeUpdateLoop(loop: Loop | string) {
+  removeUpdateLoop(loop: Loop | string): void {
     if (typeof loop === "string") {
       this.updateLoops = this.updateLoops.filter((l) => l.id() !== loop);
     } else {
@@ -19,7 +19,7 @@ export class Manager {
     }
   }
 
-  startUpdateLoops() {
+  startUpdateLoops(): void {
     this.updateLoops.forEach((loop) => {
       if (!loop.running()) {
         loop.start();
@@ -27,7 +27,7 @@ export class Manager {
     });
   }
 
-  stopUpdateLoops() {
+  stopUpdateLoops(): void {
     this.updateLoops.forEach((loop) => {
       if (loop.running()) {
         loop.stop();
