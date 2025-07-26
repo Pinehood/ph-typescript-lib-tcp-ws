@@ -1,6 +1,5 @@
 import net from "net";
 import WebSocket from "ws";
-import { v4 as uuidv4 } from "uuid";
 import {
   BaseInstanceOptions,
   Connection,
@@ -18,6 +17,7 @@ import {
   PacketEncoder,
   Queue,
   Logger,
+  Calculator,
 } from "../services";
 
 export class NetServer implements Server {
@@ -58,7 +58,7 @@ export class NetServer implements Server {
     if (this.type === "tcp" && this.tcp) {
       this.tcp.server = net.createServer((socket) => {
         socket.setTimeout(this.options.timeout ?? 0);
-        const id = uuidv4();
+        const id = Calculator.calculateNewId();
         const conn: Connection = {
           id,
           format: this.options.format,
@@ -85,7 +85,7 @@ export class NetServer implements Server {
       this.ws.server.on("connection", (socket) => {
         const sock = (socket as any)._socket;
         sock.setTimeout(this.options.timeout ?? 0);
-        const id = uuidv4();
+        const id = Calculator.calculateNewId();
         const conn: Connection = {
           id,
           format: this.options.format,

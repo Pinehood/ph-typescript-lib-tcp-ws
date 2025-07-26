@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { Calculator } from "../data";
 
 export class Loop {
   private instance: ReturnType<typeof setInterval> | null = null;
@@ -10,7 +10,7 @@ export class Loop {
     private readonly interval = 5000,
     start = false
   ) {
-    this.loopId = uuidv4();
+    this.loopId = Calculator.calculateNewId();
     if (start) {
       this.start();
     }
