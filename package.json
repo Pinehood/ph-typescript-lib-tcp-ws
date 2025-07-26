@@ -6,7 +6,6 @@
   },
   "dependencies": {
     "ph-typescript-minimal-tcp-and-ws": "file:",
-    "uuid": "^11.1.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
