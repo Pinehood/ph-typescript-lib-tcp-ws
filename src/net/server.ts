@@ -57,6 +57,7 @@ export class NetServer implements Server {
   start(): void {
     if (this.type === "tcp" && this.tcp) {
       this.tcp.server = net.createServer((socket) => {
+        socket.setTimeout(this.options.timeout ?? 0);
         const id = uuidv4();
         const conn: Connection = {
           id,
@@ -82,6 +83,8 @@ export class NetServer implements Server {
         port: this.ws.port,
       });
       this.ws.server.on("connection", (socket) => {
+        const sock = (socket as any)._socket;
+        sock.setTimeout(this.options.timeout ?? 0);
         const id = uuidv4();
         const conn: Connection = {
           id,

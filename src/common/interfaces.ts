@@ -51,6 +51,7 @@ export interface BaseInstanceOptions {
   format: "json" | "bytes";
   secure?: boolean;
   handlers?: Partial<InstanceEventHandlers>;
+  timeout?: number;
 }
 
 export interface ServerInstance<T> extends BaseInstanceOptions {

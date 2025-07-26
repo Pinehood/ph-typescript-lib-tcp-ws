@@ -66,6 +66,7 @@ export class NetClient implements Client {
           );
           reject(err);
         });
+        this.tcp.socket.setTimeout(this.options.timeout ?? 0);
       } else if (this.type === "ws" && this.ws.socket) {
         this.ws.socket.on("open", () => {
           this.retryCount = 0;
@@ -80,6 +81,8 @@ export class NetClient implements Client {
           resolve();
         });
         this.ws.socket.on("error", (err) => reject(err));
+        const sock = (this.ws.socket as any)._socket;
+        sock.setTimeout(this.options.timeout ?? 0);
       }
     });
   }
