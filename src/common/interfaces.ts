@@ -28,7 +28,7 @@ export interface Server {
   get format(): NetFormat;
   start(): void;
   stop(): void;
-  sendTo(conn: "all" | Connection | Connection[], packet: Packet): void;
+  sendTo(conn: "all" | Connection | Array<Connection>, packet: Packet): void;
   updateEventHandlers(handlers: Partial<InstanceEventHandlers>): void;
   addPacketHandler(opcode: number, handler: Handler): void;
 }
@@ -60,8 +60,8 @@ export interface ServerInstance<T> extends BaseInstanceOptions {
 }
 
 export interface LoggerService {
-  info(message: string, ...optionalParams: unknown[]): void;
-  warn(message: string, ...optionalParams: unknown[]): void;
-  error(message: string, ...optionalParams: unknown[]): void;
-  debug(message: string, ...optionalParams: unknown[]): void;
+  info(message: string, ...optionalParams: Array<unknown>): void;
+  warn(message: string, ...optionalParams: Array<unknown>): void;
+  error(message: string, ...optionalParams: Array<unknown>): void;
+  debug(message: string, ...optionalParams: Array<unknown>): void;
 }

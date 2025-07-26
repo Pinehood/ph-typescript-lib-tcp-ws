@@ -11,8 +11,8 @@ export class ConnectionPool {
     return this.connections.delete(id);
   }
 
-  get(id: string): Connection | undefined {
-    return this.connections.get(id);
+  get(id: string): Connection | null {
+    return this.connections.get(id) ?? null;
   }
 
   broadcast(packet: Packet): void {
@@ -21,7 +21,7 @@ export class ConnectionPool {
     }
   }
 
-  list(): Connection[] {
+  list(): Array<Connection> {
     return [...this.connections.values()];
   }
 }

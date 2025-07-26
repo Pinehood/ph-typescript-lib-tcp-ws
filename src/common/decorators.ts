@@ -1,7 +1,7 @@
 import { BasicType, HandlerMeta, FieldMeta } from "./types";
 
-const classMetadata = new WeakMap<any, FieldMeta[]>();
-const handlerRegistry: HandlerMeta[] = [];
+const classMetadata = new WeakMap<any, Array<FieldMeta>>();
+const handlerRegistry: Array<HandlerMeta> = [];
 
 export function Field(
   type: BasicType,
@@ -10,7 +10,7 @@ export function Field(
 ): PropertyDecorator {
   return (target, propertyKey) => {
     const ctor = target.constructor;
-    const meta: FieldMeta[] = classMetadata.get(ctor) || [];
+    const meta: Array<FieldMeta> = classMetadata.get(ctor) || [];
     meta.push({
       key: propertyKey as string,
       type,
@@ -33,11 +33,14 @@ export function PacketHandler(opcode: number): MethodDecorator {
   };
 }
 
-export function getRegisteredHandlers(): HandlerMeta[] {
+export function getRegisteredHandlers(): Array<HandlerMeta> {
   return handlerRegistry;
 }
 
-export function getClassMetadata(target: any, isCtor: boolean): FieldMeta[] {
+export function getClassMetadata(
+  target: any,
+  isCtor: boolean
+): Array<FieldMeta> {
   const ctor = isCtor ? Object.getPrototypeOf(target).constructor : target;
   const fromMap = classMetadata.get(ctor);
   if (fromMap) return fromMap;

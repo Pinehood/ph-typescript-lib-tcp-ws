@@ -2,7 +2,7 @@ import { Task } from "../../common";
 
 export class Queue {
   private concurrency: number;
-  private queue: Task<any>[];
+  private queue: Array<Task<any>>;
   private activeCount: number;
 
   constructor(concurrency: number = 1) {

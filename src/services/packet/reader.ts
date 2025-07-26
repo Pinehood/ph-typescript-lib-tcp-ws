@@ -71,7 +71,7 @@ export class PacketReader {
           obj[key] = this.readStruct(field.structType!) as any;
           break;
         case "array": {
-          const arr: any[] = [];
+          const arr: Array<any> = [];
           for (let i = 0; i < (field.arrayLength || 0); i++) {
             if (field.structType.prototype) {
               arr.push(this.readStruct(field.structType));

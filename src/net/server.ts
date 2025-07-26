@@ -113,7 +113,7 @@ export class NetServer implements Server {
     }
   }
 
-  sendTo(conn: "all" | Connection | Connection[], packet: Packet): void {
+  sendTo(conn: "all" | Connection | Array<Connection>, packet: Packet): void {
     if (conn === "all") {
       this.tcp?.pool.broadcast(packet);
     } else if (Array.isArray(conn) && conn.length) {

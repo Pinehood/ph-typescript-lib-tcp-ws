@@ -1,26 +1,26 @@
 import { LoggerService, LogLevel } from "../../common";
 
 export class Logger implements LoggerService {
-  info(message: string, ...optionalParams: unknown[]): void {
+  info(message: string, ...optionalParams: Array<unknown>): void {
     this.message(message, "info", ...optionalParams);
   }
 
-  warn(message: string, ...optionalParams: unknown[]): void {
+  warn(message: string, ...optionalParams: Array<unknown>): void {
     this.message(message, "warn", ...optionalParams);
   }
 
-  error(message: string, ...optionalParams: unknown[]): void {
+  error(message: string, ...optionalParams: Array<unknown>): void {
     this.message(message, "error", ...optionalParams);
   }
 
-  debug(message: string, ...optionalParams: unknown[]): void {
+  debug(message: string, ...optionalParams: Array<unknown>): void {
     this.message(message, "debug", ...optionalParams);
   }
 
   private message(
     message: string,
     level: LogLevel,
-    ...optionalParams: unknown[]
+    ...optionalParams: Array<unknown>
   ): void {
     const caller = this.caller();
     const msg = `[${new Date().toISOString()}] [${level.toUpperCase()}] ${caller} ${message}`;

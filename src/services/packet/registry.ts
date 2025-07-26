@@ -20,7 +20,9 @@ export class PacketRegistry {
     this.handlers.set(opcode, { opcode, handlerFn: handler, payloadClass });
   }
 
-  async loadHandlersFrom(sources: (string | (new () => any))[]): Promise<void> {
+  async loadHandlersFrom(
+    sources: string | Array<new () => any>
+  ): Promise<void> {
     for (const source of sources) {
       if (typeof source === "string") {
         const absPath = path.resolve(source);
