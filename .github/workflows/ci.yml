@@ -1,0 +1,22 @@
+name: Continuous Integration
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [develop]
+jobs:
+  integrate:
+    name: Install & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
