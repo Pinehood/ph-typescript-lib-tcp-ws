@@ -8,6 +8,7 @@ export class PacketReader {
     if (buffer instanceof ArrayBuffer) {
       this.buffer = buffer;
     } else if (Buffer.isBuffer(buffer)) {
+      // @ts-ignore
       this.buffer = buffer.buffer.slice(
         buffer.byteOffset,
         buffer.byteOffset + buffer.byteLength
@@ -15,6 +16,7 @@ export class PacketReader {
     } else {
       throw new TypeError("PacketReader expects Buffer or ArrayBuffer");
     }
+    // @ts-ignore
     this.view = new DataView(this.buffer);
   }
 
@@ -59,6 +61,7 @@ export class PacketReader {
         case "string": {
           const len = this.view.getUint16(this.offset);
           this.offset += 2;
+          // @ts-ignore
           const strBytes = new Uint8Array(this.buffer, this.offset, len);
           obj[key] = new TextDecoder().decode(strBytes) as any;
           this.offset += len;
