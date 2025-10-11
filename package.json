@@ -1,6 +1,6 @@
 {
   "name": "ph-typescript-lib-tcp-ws",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "scripts": {
     "build": "npx tsc --outDir ./dist"
   },
